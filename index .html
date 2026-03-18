@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>API Testing Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f0e8;
+  --surface:#fffdf7;
+  --surface2:#f0ebe0;
+  --ink:#1a1410;
+  --ink2:#4a3f30;
+  --muted:#9a8f7a;
+  --border:#e0d8c8;
+  --accent:#e8531a;
+  --accent2:#1a6fe8;
+  --accent3:#16a34a;
+  --accent4:#9333ea;
+  --yellow:#f5c518;
+  --tag-bg:#1a1410;
+  --tag-text:#f5f0e8;
+  --easy:#dcfce7;--easy-t:#15803d;
+  --med:#fef9c3;--med-t:#a16207;
+  --hard:#fee2e2;--hard-t:#dc2626;
+  --expert:#f3e8ff;--expert-t:#7c3aed;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  font-family:'Cabinet Grotesk',sans-serif;
+  color:var(--ink);
+  min-height:100vh;
+}
+
+/* ── NOISE TEXTURE ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.4;
+}
+
+/* ── HERO ── */
+.hero{
+  padding:60px 40px 40px;
+  max-width:1100px;margin:0 auto;
+  position:relative;
+}
+.hero-label{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--tag-bg);color:var(--tag-text);
+  font-family:'Fira Code',monospace;font-size:.72rem;
+  padding:6px 14px;border-radius:2px;
+  letter-spacing:2px;margin-bottom:24px;
+}
+.hero-label span{color:var(--accent);animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.hero h1{
+  font-family:'Clash Display',sans-serif;
+  font-size:clamp(2.4rem,6vw,4.5rem);
+  font-weight:700;line-height:1.05;
+  letter-spacing:-2px;
+  margin-bottom:16px;
+}
+.hero h1 em{
+  font-style:normal;
+  -webkit-text-stroke:2px var(--ink);
+  color:transparent;
+}
+.hero-sub{
+  font-size:1.05rem;color:var(--ink2);
+  max-width:560px;line-height:1.7;margin-bottom:32px;
+  font-weight:400;
+}
+.stats-row{
+  display:flex;flex-wrap:wrap;gap:16px;margin-bottom:40px;
+}
+.stat-pill{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface);border:1.5px solid var(--border);
+  padding:10px 18px;border-radius:50px;
+  font-size:.85rem;font-weight:500;
+}
+.stat-pill strong{color:var(--accent);font-family:'Clash Display',sans-serif;font-size:1.1rem}
+
+/* ── SEARCH & FILTER BAR ── */
+.controls{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:12px;padding:16px 20px;
+  display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+  margin-bottom:32px;
+  box-shadow:0 2px 16px #1a141008;
+}
+.search-wrap{
+  flex:1;min-width:200px;position:relative;
+}
+.search-wrap input{
+  width:100%;padding:10px 16px 10px 40px;
+  border:1.5px solid var(--border);border-radius:8px;
+  background:var(--bg);font-family:'Cabinet Grotesk',sans-serif;
+  font-size:.92rem;color:var(--ink);outline:none;
+  transition:border-color .2s;
+}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap::before{
+  content:'⌕';position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  color:var(--muted);font-size:1.1rem;
+}
+.filter-chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  padding:7px 14px;border-radius:50px;
+  border:1.5px solid var(--border);background:transparent;
+  font-family:'Cabinet Grotesk',sans-serif;font-size:.8rem;font-weight:500;
+  cursor:pointer;transition:all .2s;color:var(--ink2);
+}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip.active{background:var(--tag-bg);color:var(--tag-text);border-color:var(--tag-bg)}
+.chip.easy.active{background:var(--easy-t);border-color:var(--easy-t);color:#fff}
+.chip.medium.active{background:var(--med-t);border-color:var(--med-t);color:#fff}
+.chip.hard.active{background:var(--hard-t);border-color:var(--hard-t);color:#fff}
+.chip.expert.active{background:var(--expert-t);border-color:var(--expert-t);color:#fff}
+
+/* ── MAIN LAYOUT ── */
+.main{max-width:1100px;margin:0 auto;padding:0 40px 80px;position:relative;z-index:1}
+
+/* ── SECTION HEADERS ── */
+.section-header{
+  display:flex;align-items:center;gap:12px;
+  margin:40px 0 20px;
+}
+.section-num{
+  width:36px;height:36px;border-radius:6px;
+  background:var(--tag-bg);color:var(--tag-text);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fira Code',monospace;font-size:.8rem;font-weight:500;
+  flex-shrink:0;
+}
+.section-header h2{
+  font-family:'Clash Display',sans-serif;
+  font-size:1.5rem;font-weight:600;letter-spacing:-0.5px;
+}
+.section-line{flex:1;height:1.5px;background:var(--border);margin-left:8px}
+
+/* ── QUESTION CARDS ── */
+.questions-grid{display:flex;flex-direction:column;gap:12px}
+
+.q-card{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  transition:all .25s;
+  position:relative;
+}
+.q-card:hover{
+  border-color:#c0b8a8;
+  box-shadow:0 8px 32px #1a141010;
+  transform:translateY(-1px);
+}
+.q-card.open{border-color:var(--accent);box-shadow:0 4px 24px #e8531a15}
+
+.q-header{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:18px 20px;cursor:pointer;user-select:none;
+}
+.q-num{
+  font-family:'Fira Code',monospace;font-size:.72rem;
+  color:var(--muted);font-weight:500;flex-shrink:0;
+  margin-top:3px;min-width:28px;
+}
+.q-title{
+  flex:1;font-size:.97rem;font-weight:500;line-height:1.5;
+  color:var(--ink);
+}
+.q-meta{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-top:2px}
+.badge{
+  font-size:.65rem;font-weight:600;letter-spacing:.5px;
+  padding:3px 9px;border-radius:4px;text-transform:uppercase;
+}
+.badge.easy{background:var(--easy);color:var(--easy-t)}
+.badge.medium{background:var(--med);color:var(--med-t)}
+.badge.hard{background:var(--hard);color:var(--hard-t)}
+.badge.expert{background:var(--expert);color:var(--expert-t)}
+
+.chevron{
+  color:var(--muted);font-size:1rem;
+  transition:transform .3s;flex-shrink:0;
+  margin-top:2px;
+}
+.q-card.open .chevron{transform:rotate(180deg);color:var(--accent)}
+
+/* ── ANSWER ── */
+.q-answer{
+  max-height:0;overflow:hidden;
+  transition:max-height .4s cubic-bezier(.4,0,.2,1);
+}
+.q-card.open .q-answer{max-height:2000px}
+.answer-inner{
+  padding:0 20px 22px 62px;
+  border-top:1.5px solid var(--border);
+  padding-top:18px;
+}
+.answer-inner p{
+  font-size:.92rem;line-height:1.8;color:var(--ink2);
+  margin-bottom:12px;
+}
+.answer-inner p:last-child{margin-bottom:0}
+.answer-inner strong{color:var(--ink);font-weight:600}
+.answer-inner ul,.answer-inner ol{
+  padding-left:20px;margin-bottom:12px;
+}
+.answer-inner li{
+  font-size:.92rem;line-height:1.8;color:var(--ink2);
+  margin-bottom:4px;
+}
+.answer-inner li strong{color:var(--ink)}
+
+/* ── CODE ── */
+.code-snippet{
+  background:#1a1410;color:#f5f0e8;
+  border-radius:8px;padding:16px 18px;
+  font-family:'Fira Code',monospace;font-size:.8rem;
+  line-height:1.8;margin:12px 0;overflow-x:auto;
+  position:relative;
+}
+.code-snippet .c-green{color:#4ade80}
+.code-snippet .c-yellow{color:#fde047}
+.code-snippet .c-blue{color:#60a5fa}
+.code-snippet .c-red{color:#f87171}
+.code-snippet .c-orange{color:#fb923c}
+.code-snippet .c-purple{color:#c084fc}
+.code-snippet .c-gray{color:#9ca3af}
+
+/* ── TIP BOX ── */
+.tip-box{
+  background:linear-gradient(135deg,#fff9e6,#fff3cd);
+  border:1.5px solid #f5c518;border-left:4px solid #f5c518;
+  border-radius:8px;padding:12px 16px;margin:12px 0;
+  font-size:.88rem;color:#78580a;line-height:1.7;
+}
+.tip-box::before{content:'💡 ';font-size:.9rem}
+
+.note-box{
+  background:#eff6ff;border:1.5px solid #bfdbfe;border-left:4px solid var(--accent2);
+  border-radius:8px;padding:12px 16px;margin:12px 0;
+  font-size:.88rem;color:#1e40af;line-height:1.7;
+}
+.note-box::before{content:'📌 ';font-size:.9rem}
+
+/* ── TABLE ── */
+.q-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.85rem}
+.q-table th{background:var(--tag-bg);color:var(--tag-text);padding:9px 14px;text-align:left;font-weight:500}
+.q-table td{padding:8px 14px;border-bottom:1px solid var(--border);color:var(--ink2)}
+.q-table tr:last-child td{border-bottom:none}
+.q-table tr:hover td{background:var(--bg)}
+
+/* ── PROGRESS ── */
+.progress-bar-wrap{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:8px;padding:16px 20px;margin-bottom:24px;
+  display:flex;align-items:center;gap:16px;
+}
+.prog-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),#f5a623);border-radius:4px;transition:width .5s ease;width:0%}
+.prog-label{font-size:.8rem;color:var(--muted);font-family:'Fira Code',monospace;white-space:nowrap}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty p{font-size:1rem}
+
+/* ── BACK TO TOP ── */
+.back-top{
+  position:fixed;bottom:32px;right:32px;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--tag-bg);color:var(--tag-text);
+  border:none;cursor:pointer;font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px #1a141030;
+  opacity:0;transform:translateY(10px);
+  transition:all .3s;z-index:999;
+}
+.back-top.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:640px){
+  .hero{padding:40px 20px 24px}
+  .main{padding:0 20px 60px}
+  .answer-inner{padding:16px}
+  .q-meta{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero" style="z-index:1;position:relative">
+  <div class="hero-label"><span>▶</span> INTERVIEW PREP KIT</div>
+  <h1>API Testing<br/><em>Interview Q&A</em></h1>
+  <p class="hero-sub">From absolute basics to senior-level concepts. Every question you need to crack your next API testing interview — with detailed answers.</p>
+  <div class="stats-row">
+    <div class="stat-pill"><strong id="totalCount">80</strong> Questions</div>
+    <div class="stat-pill"><strong>5</strong> Levels</div>
+    <div class="stat-pill"><strong id="openedCount">0</strong> Explored</div>
+    <div class="stat-pill">🕐 <strong>~4hrs</strong> Study Time</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Search questions..." oninput="filterAll()"/>
+    </div>
+    <div class="filter-chips">
+      <button class="chip active" data-level="all" onclick="setLevel(this,'all')">All</button>
+      <button class="chip easy" data-level="easy" onclick="setLevel(this,'easy')">🟢 Beginner</button>
+      <button class="chip medium" data-level="medium" onclick="setLevel(this,'medium')">🟡 Intermediate</button>
+      <button class="chip hard" data-level="hard" onclick="setLevel(this,'hard')">🔴 Advanced</button>
+      <button class="chip expert" data-level="expert" onclick="setLevel(this,'expert')">🟣 Expert</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar-wrap">
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    <div class="prog-label" id="progLabel">0% explored</div>
+  </div>
+
+  <!-- QUESTIONS RENDERED HERE -->
+  <div id="questionsRoot"></div>
+
+</div>
+
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// ══════════════════════════════════════════
+//  ALL QUESTIONS DATA
+// ══════════════════════════════════════════
+const sections = [
+  {
+    title:"API Fundamentals",
+    icon:"01",
+    questions:[
+      {
+        q:"What is an API? Explain with a real-world example.",
+        level:"easy",
+        a:`<p>An <strong>API (Application Programming Interface)</strong> is a set of rules and protocols that allows different software applications to communicate with each other. It defines how requests should be made and what responses to expect.</p>
+        <p><strong>Real-world example:</strong> Think of a restaurant. You (the client) look at the menu (API documentation), tell the waiter (API) your order, and the kitchen (server) prepares it. You don't need to know how the kitchen works — just how to communicate with the waiter.</p>
+        <div class="note-box">In software: When you use a weather app, it calls a weather API to get temperature data from a remote server. The app doesn't know how the server stores data — it just uses the API.</div>
+        <p><strong>Key components of an API:</strong></p>
+        <ul>
+          <li><strong>Endpoint</strong> — The URL where the API can be accessed</li>
+          <li><strong>Request</strong> — What you ask the API for</li>
+          <li><strong>Response</strong> — What the API sends back</li>
+          <li><strong>Authentication</strong> — Proof that you're allowed to use it</li>
+        </ul>`
+      },
+      {
+        q:"What are the different types of APIs?",
+        level:"easy",
+        a:`<p>APIs are categorized by their access level and architecture:</p>
+        <p><strong>By Access Level:</strong></p>
+        <ul>
+          <li><strong>Public APIs</strong> — Open to everyone (e.g., OpenWeatherMap, Twitter API)</li>
+          <li><strong>Private APIs</strong> — Internal use only within an organization</li>
+          <li><strong>Partner APIs</strong> — Shared with specific business partners</li>
+          <li><strong>Composite APIs</strong> — Combine multiple APIs in one call</li>
+        </ul>
+        <p><strong>By Architecture Style:</strong></p>
+        <ul>
+          <li><strong>REST</strong> — Most popular, uses HTTP methods</li>
+          <li><strong>SOAP</strong> — Older, uses XML, very strict</li>
+          <li><strong>GraphQL</strong> — Query exactly what you need</li>
+          <li><strong>gRPC</strong> — Fast, uses Protocol Buffers, great for microservices</li>
+          <li><strong>WebSocket</strong> — Real-time, two-way communication</li>
+        </ul>`
+      },
+      {
+        q:"What is REST? What are its 6 constraints?",
+        level:"easy",
+        a:`<p><strong>REST (Representational State Transfer)</strong> is an architectural style for designing networked applications. APIs following REST principles are called RESTful APIs.</p>
+        <p><strong>6 REST Constraints:</strong></p>
+        <ul>
+          <li><strong>1. Client-Server</strong> — Client and server are separate; client handles UI, server handles data</li>
+          <li><strong>2. Stateless</strong> — Each request must contain all info needed; server stores no client state between requests</li>
+          <li><strong>3. Cacheable</strong> — Responses should indicate if they can be cached to improve performance</li>
+          <li><strong>4. Uniform Interface</strong> — Consistent way to interact (standard HTTP methods, URIs, status codes)</li>
+          <li><strong>5. Layered System</strong> — Client doesn't know if it's talking directly to server or a middleman (proxy, load balancer)</li>
+          <li><strong>6. Code on Demand (optional)</strong> — Server can send executable code to the client (e.g., JavaScript)</li>
+        </ul>
+        <div class="tip-box">REST APIs use standard HTTP methods: GET, POST, PUT, PATCH, DELETE. This makes them easy to understand and use.</div>`
+      },
+      {
+        q:"Explain HTTP methods: GET, POST, PUT, PATCH, DELETE",
+        level:"easy",
+        a:`<p>HTTP methods define what action to perform on a resource:</p>
+        <div class="code-snippet"><span class="c-green">GET</span>    /users/1      → Retrieve user with ID 1 (Read)
+<span class="c-yellow">POST</span>   /users         → Create a new user
+<span class="c-blue">PUT</span>    /users/1      → Replace entire user record (Full update)
+<span class="c-orange">PATCH</span>  /users/1      → Update only specific fields (Partial update)
+<span class="c-red">DELETE</span> /users/1      → Delete user with ID 1</div>
+        <table class="q-table"><thead><tr><th>Method</th><th>Idempotent?</th><th>Safe?</th><th>Has Body?</th></tr></thead><tbody>
+        <tr><td>GET</td><td>✅ Yes</td><td>✅ Yes</td><td>❌ No</td></tr>
+        <tr><td>POST</td><td>❌ No</td><td>❌ No</td><td>✅ Yes</td></tr>
+        <tr><td>PUT</td><td>✅ Yes</td><td>❌ No</td><td>✅ Yes</td></tr>
+        <tr><td>PATCH</td><td>❌ No</td><td>❌ No</td><td>✅ Yes</td></tr>
+        <tr><td>DELETE</td><td>✅ Yes</td><td>❌ No</td><td>Optional</td></tr>
+        </tbody></table>
+        <div class="note-box"><strong>Idempotent</strong> means calling it multiple times gives the same result. <strong>Safe</strong> means it doesn't modify data.</div>`
+      },
+      {
+        q:"What are HTTP Status Codes? List the important ones.",
+        level:"easy",
+        a:`<p>HTTP status codes tell you the result of your API request. They're grouped by first digit:</p>
+        <table class="q-table"><thead><tr><th>Code</th><th>Meaning</th><th>When</th></tr></thead><tbody>
+        <tr><td><strong>200</strong></td><td>OK</td><td>Successful GET/PUT/PATCH</td></tr>
+        <tr><td><strong>201</strong></td><td>Created</td><td>Successful POST (resource created)</td></tr>
+        <tr><td><strong>204</strong></td><td>No Content</td><td>Successful DELETE (nothing to return)</td></tr>
+        <tr><td><strong>400</strong></td><td>Bad Request</td><td>Invalid input / malformed request</td></tr>
+        <tr><td><strong>401</strong></td><td>Unauthorized</td><td>Not authenticated (no/bad token)</td></tr>
+        <tr><td><strong>403</strong></td><td>Forbidden</td><td>Authenticated but no permission</td></tr>
+        <tr><td><strong>404</strong></td><td>Not Found</td><td>Resource doesn't exist</td></tr>
+        <tr><td><strong>405</strong></td><td>Method Not Allowed</td><td>Wrong HTTP method used</td></tr>
+        <tr><td><strong>409</strong></td><td>Conflict</td><td>Duplicate resource / version conflict</td></tr>
+        <tr><td><strong>422</strong></td><td>Unprocessable Entity</td><td>Validation failed</td></tr>
+        <tr><td><strong>429</strong></td><td>Too Many Requests</td><td>Rate limit exceeded</td></tr>
+        <tr><td><strong>500</strong></td><td>Internal Server Error</td><td>Server-side bug</td></tr>
+        <tr><td><strong>502</strong></td><td>Bad Gateway</td><td>Upstream server problem</td></tr>
+        <tr><td><strong>503</strong></td><td>Service Unavailable</td><td>Server down/overloaded</td></tr>
+        </tbody></table>
+        <div class="tip-box">Quick memory trick: 2xx = Success, 3xx = Redirect, 4xx = Client error (your fault), 5xx = Server error (their fault)</div>`
+      },
+      {
+        q:"What is the difference between SOAP and REST?",
+        level:"easy",
+        a:`<table class="q-table"><thead><tr><th>Feature</th><th>REST</th><th>SOAP</th></tr></thead><tbody>
+        <tr><td>Format</td><td>JSON, XML, HTML</td><td>XML only</td></tr>
+        <tr><td>Protocol</td><td>HTTP</td><td>HTTP, SMTP, TCP</td></tr>
+        <tr><td>Speed</td><td>Faster, lightweight</td><td>Slower, heavy</td></tr>
+        <tr><td>Standards</td><td>Flexible</td><td>Strict (WSDL)</td></tr>
+        <tr><td>Security</td><td>HTTPS, OAuth</td><td>WS-Security (built-in)</td></tr>
+        <tr><td>Caching</td><td>Supported</td><td>Not supported</td></tr>
+        <tr><td>Use Case</td><td>Web/Mobile APIs</td><td>Banking, Enterprise</td></tr>
+        </tbody></table>
+        <div class="note-box">SOAP is like sending a formal letter in an envelope. REST is like sending a text message. Both work, but REST is much faster and simpler for most use cases.</div>`
+      },
+      {
+        q:"What is an API Endpoint? Give examples.",
+        level:"easy",
+        a:`<p>An <strong>endpoint</strong> is a specific URL where an API resource can be accessed. It's the address you send your request to.</p>
+        <div class="code-snippet"><span class="c-gray"># Base URL</span>
+https://api.example.com
+
+<span class="c-gray"># Endpoints</span>
+<span class="c-green">GET</span>    https://api.example.com/<span class="c-yellow">users</span>           → All users
+<span class="c-green">GET</span>    https://api.example.com/<span class="c-yellow">users/42</span>       → User with ID 42
+<span class="c-yellow">POST</span>   https://api.example.com/<span class="c-yellow">users</span>           → Create user
+<span class="c-blue">PUT</span>    https://api.example.com/<span class="c-yellow">users/42</span>       → Update user 42
+<span class="c-red">DELETE</span> https://api.example.com/<span class="c-yellow">users/42</span>       → Delete user 42
+<span class="c-green">GET</span>    https://api.example.com/<span class="c-yellow">users/42/orders</span> → Orders of user 42</div>
+        <p><strong>Good endpoint naming rules:</strong></p>
+        <ul>
+          <li>Use nouns, not verbs: <code>/users</code> not <code>/getUsers</code></li>
+          <li>Use plural nouns: <code>/products</code> not <code>/product</code></li>
+          <li>Use lowercase and hyphens: <code>/order-items</code></li>
+          <li>Use hierarchy for relationships: <code>/users/{id}/posts</code></li>
+        </ul>`
+      },
+      {
+        q:"What is JSON? Why is it used in APIs?",
+        level:"easy",
+        a:`<p><strong>JSON (JavaScript Object Notation)</strong> is a lightweight, human-readable data format. It's the most popular format for API request/response bodies.</p>
+        <div class="code-snippet"><span class="c-gray">// JSON Request Body (POST /users)</span>
+{
+  <span class="c-green">"name"</span>: <span class="c-yellow">"Alice Johnson"</span>,
+  <span class="c-green">"email"</span>: <span class="c-yellow">"alice@example.com"</span>,
+  <span class="c-green">"age"</span>: <span class="c-purple">28</span>,
+  <span class="c-green">"isActive"</span>: <span class="c-blue">true</span>,
+  <span class="c-green">"address"</span>: {
+    <span class="c-green">"city"</span>: <span class="c-yellow">"Bangalore"</span>,
+    <span class="c-green">"country"</span>: <span class="c-yellow">"India"</span>
+  },
+  <span class="c-green">"tags"</span>: [<span class="c-yellow">"developer"</span>, <span class="c-yellow">"tester"</span>]
+}</div>
+        <p><strong>JSON data types:</strong> string, number, boolean, null, object, array</p>
+        <p><strong>Why JSON over XML?</strong></p>
+        <ul>
+          <li>Smaller file size (less bandwidth)</li>
+          <li>Easier to read and write</li>
+          <li>Natively supported in JavaScript</li>
+          <li>Faster to parse</li>
+        </ul>`
+      },
+    ]
+  },
+  {
+    title:"API Testing Basics",
+    icon:"02",
+    questions:[
+      {
+        q:"What is API Testing? Why is it important?",
+        level:"easy",
+        a:`<p><strong>API Testing</strong> is a type of software testing that validates APIs directly — checking that they work correctly, reliably, and securely without using a user interface.</p>
+        <p><strong>What we test in API testing:</strong></p>
+        <ul>
+          <li><strong>Functionality</strong> — Does it do what it's supposed to?</li>
+          <li><strong>Reliability</strong> — Does it work consistently?</li>
+          <li><strong>Performance</strong> — Does it respond fast enough?</li>
+          <li><strong>Security</strong> — Is data protected?</li>
+          <li><strong>Data accuracy</strong> — Is the response data correct?</li>
+        </ul>
+        <p><strong>Why it's important:</strong></p>
+        <ul>
+          <li>APIs are the backbone of modern apps — if the API fails, the whole app fails</li>
+          <li>Catches bugs earlier (before UI is built)</li>
+          <li>Faster to run than UI tests</li>
+          <li>Not affected by UI changes</li>
+          <li>Easier to automate</li>
+        </ul>
+        <div class="tip-box">API tests run 10–100x faster than UI tests and are far more stable. Testing at the API layer gives you the best ROI.</div>`
+      },
+      {
+        q:"What is Postman? How do you use it for API testing?",
+        level:"easy",
+        a:`<p><strong>Postman</strong> is the most popular API testing tool. It provides a GUI to send HTTP requests and inspect responses without writing code.</p>
+        <p><strong>Key Postman features:</strong></p>
+        <ul>
+          <li><strong>Collections</strong> — Organize related API requests into folders</li>
+          <li><strong>Environments</strong> — Store variables for different stages (dev, staging, prod)</li>
+          <li><strong>Pre-request Scripts</strong> — JavaScript code that runs before a request</li>
+          <li><strong>Tests (Post-response)</strong> — JavaScript assertions after response arrives</li>
+          <li><strong>Newman</strong> — Run Postman collections from command line (CI/CD)</li>
+          <li><strong>Mock Servers</strong> — Simulate API responses</li>
+        </ul>
+        <div class="code-snippet"><span class="c-gray">// Postman Test Script (JavaScript)</span>
+pm.test(<span class="c-yellow">"Status is 200"</span>, () => {
+  pm.response.to.have.status(<span class="c-purple">200</span>);
+});
+
+pm.test(<span class="c-yellow">"Response has user id"</span>, () => {
+  <span class="c-blue">const</span> json = pm.response.json();
+  pm.expect(json.id).to.be.a(<span class="c-yellow">'number'</span>);
+  pm.expect(json.name).to.not.be.empty;
+});</div>`
+      },
+      {
+        q:"What is the difference between API testing and UI testing?",
+        level:"easy",
+        a:`<table class="q-table"><thead><tr><th>Aspect</th><th>API Testing</th><th>UI Testing</th></tr></thead><tbody>
+        <tr><td>Layer</td><td>Business logic layer</td><td>Presentation layer</td></tr>
+        <tr><td>Speed</td><td>Very fast</td><td>Slow (browser rendering)</td></tr>
+        <tr><td>Stability</td><td>High (no UI changes)</td><td>Fragile (UI changes break tests)</td></tr>
+        <tr><td>Tools</td><td>Postman, RestAssured, Karate</td><td>Selenium, Cypress, Playwright</td></tr>
+        <tr><td>Setup</td><td>Simple</td><td>Complex (browser, drivers)</td></tr>
+        <tr><td>Debugging</td><td>Easy (clear request/response)</td><td>Harder (visual debugging)</td></tr>
+        <tr><td>Coverage</td><td>Business rules, data</td><td>User workflows, visual</td></tr>
+        </tbody></table>
+        <div class="note-box">The Testing Pyramid suggests: write more API tests (middle layer) than UI tests (top layer), and most at unit test level (base).</div>`
+      },
+      {
+        q:"What is a Request and Response in API testing? Explain all parts.",
+        level:"easy",
+        a:`<p><strong>Request</strong> — What you send to the API server:</p>
+        <div class="code-snippet"><span class="c-gray">## HTTP Request Structure</span>
+
+<span class="c-green">POST</span> /api/users <span class="c-blue">HTTP/1.1</span>          ← Request Line (Method + URL + Version)
+
+<span class="c-gray"># HEADERS</span>
+Host: api.example.com                    ← Where to send
+Content-Type: application/json           ← Body format
+Authorization: Bearer eyJhbGci...        ← Auth token
+Accept: application/json                 ← Expected response format
+
+<span class="c-gray"># BODY</span>
+{
+  "name": "Alice",
+  "email": "alice@example.com"
+}</div>
+        <p><strong>Response</strong> — What the server sends back:</p>
+        <div class="code-snippet"><span class="c-gray">## HTTP Response Structure</span>
+
+<span class="c-blue">HTTP/1.1</span> <span class="c-green">201 Created</span>                 ← Status Line
+
+<span class="c-gray"># HEADERS</span>
+Content-Type: application/json
+X-Request-Id: abc-123
+Cache-Control: no-cache
+
+<span class="c-gray"># BODY</span>
+{
+  "id": 42,
+  "name": "Alice",
+  "email": "alice@example.com",
+  "createdAt": "2024-01-15T09:30:00Z"
+}</div>`
+      },
+      {
+        q:"What are the types of API testing?",
+        level:"medium",
+        a:`<p>API testing covers many different types of validation:</p>
+        <ul>
+          <li><strong>Functional Testing</strong> — Does the API do what it's supposed to? (Correct output for given input)</li>
+          <li><strong>Integration Testing</strong> — Do multiple APIs work together correctly?</li>
+          <li><strong>Regression Testing</strong> — Did new changes break existing functionality?</li>
+          <li><strong>Load Testing</strong> — How does the API perform under high traffic?</li>
+          <li><strong>Stress Testing</strong> — What's the breaking point of the API?</li>
+          <li><strong>Security Testing</strong> — Is the API protected from attacks?</li>
+          <li><strong>Negative Testing</strong> — How does it handle invalid inputs?</li>
+          <li><strong>Validation Testing</strong> — Is the data schema and format correct?</li>
+          <li><strong>UI Testing</strong> — Does the API integrate correctly with the frontend?</li>
+          <li><strong>Fuzz Testing</strong> — Send random/unexpected data to find crashes</li>
+          <li><strong>Contract Testing</strong> — Does the API match its documented contract?</li>
+          <li><strong>End-to-End Testing</strong> — Full user workflow through multiple APIs</li>
+        </ul>`
+      },
+      {
+        q:"What do you verify in API response testing?",
+        level:"medium",
+        a:`<p>A thorough API test verifies multiple aspects of the response:</p>
+        <ul>
+          <li><strong>Status Code</strong> — Is it the expected code? (200, 201, 400, etc.)</li>
+          <li><strong>Response Body</strong> — Is the data correct and complete?</li>
+          <li><strong>Data Types</strong> — Is each field the right type? (string, number, boolean)</li>
+          <li><strong>Required Fields</strong> — Are all mandatory fields present?</li>
+          <li><strong>Response Time</strong> — Is it within acceptable limits? (e.g., &lt;200ms)</li>
+          <li><strong>Headers</strong> — Content-Type, CORS headers, Cache-Control</li>
+          <li><strong>Schema Validation</strong> — Does response match the defined schema?</li>
+          <li><strong>Error Messages</strong> — Are error responses descriptive and correct?</li>
+          <li><strong>Pagination</strong> — Are page/limit/total fields correct?</li>
+          <li><strong>Authentication</strong> — Does it reject unauthorized requests?</li>
+        </ul>
+        <div class="code-snippet"><span class="c-gray">// Complete assertion checklist in Postman</span>
+pm.test(<span class="c-yellow">"Status 200"</span>, () => pm.response.to.have.status(<span class="c-purple">200</span>));
+pm.test(<span class="c-yellow">"Response time &lt; 500ms"</span>, () => pm.expect(pm.response.responseTime).to.be.below(<span class="c-purple">500</span>));
+pm.test(<span class="c-yellow">"Has correct content-type"</span>, () => pm.response.to.have.header(<span class="c-yellow">"Content-Type"</span>, <span class="c-yellow">"application/json"</span>));
+pm.test(<span class="c-yellow">"Body has required fields"</span>, () => {
+  <span class="c-blue">const</span> body = pm.response.json();
+  pm.expect(body).to.have.all.keys(<span class="c-yellow">'id'</span>, <span class="c-yellow">'name'</span>, <span class="c-yellow">'email'</span>);
+});</div>`
+      },
+    ]
+  },
+  {
+    title:"Authentication & Security",
+    icon:"03",
+    questions:[
+      {
+        q:"What is API Authentication? What are the types?",
+        level:"medium",
+        a:`<p><strong>Authentication</strong> verifies who you are before allowing API access. Different methods offer different trade-offs between security and simplicity.</p>
+        <p><strong>Types of API Authentication:</strong></p>
+        <ul>
+          <li><strong>API Key</strong> — A unique string passed in headers or query params. Simple but less secure.</li>
+          <li><strong>Basic Auth</strong> — Username:password encoded in Base64. Only use over HTTPS.</li>
+          <li><strong>Bearer Token (JWT)</strong> — A signed token sent in Authorization header. Very common.</li>
+          <li><strong>OAuth 2.0</strong> — Industry standard for delegated access. Used by Google, GitHub, etc.</li>
+          <li><strong>OAuth 1.0</strong> — Older, more complex version. Rarely used now.</li>
+          <li><strong>HMAC</strong> — Hash-based message authentication. Used in AWS.</li>
+          <li><strong>Mutual TLS (mTLS)</strong> — Both client and server verify certificates.</li>
+        </ul>
+        <div class="code-snippet"><span class="c-gray"># API Key in header</span>
+X-API-Key: your-api-key-here
+
+<span class="c-gray"># Basic Auth</span>
+Authorization: Basic dXNlcjpwYXNzd29yZA==
+
+<span class="c-gray"># Bearer Token (JWT)</span>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</div>`
+      },
+      {
+        q:"What is JWT? How does it work?",
+        level:"medium",
+        a:`<p><strong>JWT (JSON Web Token)</strong> is a compact, self-contained token used to transmit information securely between parties. It's the most common authentication method for REST APIs.</p>
+        <p><strong>JWT has 3 parts separated by dots:</strong></p>
+        <div class="code-snippet"><span class="c-green">eyJhbGciOiJIUzI1NiJ9</span>.<span class="c-yellow">eyJ1c2VySWQiOjQyfQ</span>.<span class="c-red">SflKxwRJSMeKKF2QT4</span>
+
+<span class="c-green">HEADER</span>          <span class="c-yellow">PAYLOAD</span>          <span class="c-red">SIGNATURE</span></div>
+        <ul>
+          <li><strong>Header</strong> — Algorithm type: <code>{"alg": "HS256", "typ": "JWT"}</code></li>
+          <li><strong>Payload</strong> — Claims (user data): <code>{"userId": 42, "role": "admin", "exp": 1700000000}</code></li>
+          <li><strong>Signature</strong> — Hash of header + payload with a secret key (verifies authenticity)</li>
+        </ul>
+        <p><strong>JWT Flow:</strong></p>
+        <ol>
+          <li>User logs in with credentials</li>
+          <li>Server validates, creates JWT, sends back</li>
+          <li>Client stores JWT (localStorage or cookie)</li>
+          <li>Client sends JWT in every subsequent request</li>
+          <li>Server validates signature on each request</li>
+        </ol>
+        <div class="tip-box">JWT is stateless — the server doesn't store sessions. The token itself contains all needed info. Always check expiry (exp claim)!</div>`
+      },
+      {
+        q:"What is OAuth 2.0? Explain the flow.",
+        level:"hard",
+        a:`<p><strong>OAuth 2.0</strong> is an authorization framework that allows third-party apps to access user data without exposing passwords. Example: "Login with Google".</p>
+        <p><strong>Key OAuth 2.0 Roles:</strong></p>
+        <ul>
+          <li><strong>Resource Owner</strong> — The user who owns the data</li>
+          <li><strong>Client</strong> — The app requesting access</li>
+          <li><strong>Authorization Server</strong> — Issues tokens (e.g., Google's auth server)</li>
+          <li><strong>Resource Server</strong> — The API holding the data</li>
+        </ul>
+        <p><strong>Authorization Code Flow (most secure):</strong></p>
+        <div class="code-snippet"><span class="c-gray">1.</span> User clicks "Login with Google" on your app
+<span class="c-gray">2.</span> App redirects user → Google's Authorization Server
+<span class="c-gray">3.</span> User logs in & grants permission on Google
+<span class="c-gray">4.</span> Google redirects back with <span class="c-green">Authorization Code</span>
+<span class="c-gray">5.</span> App sends code + client_secret → Google
+<span class="c-gray">6.</span> Google returns <span class="c-yellow">Access Token</span> + <span class="c-blue">Refresh Token</span>
+<span class="c-gray">7.</span> App uses Access Token to call Google APIs</div>
+        <p><strong>OAuth 2.0 Grant Types:</strong></p>
+        <ul>
+          <li><strong>Authorization Code</strong> — Web apps (most secure)</li>
+          <li><strong>Client Credentials</strong> — Machine-to-machine</li>
+          <li><strong>Implicit</strong> — Deprecated (was for SPAs)</li>
+          <li><strong>Resource Owner Password</strong> — Deprecated (insecure)</li>
+          <li><strong>PKCE</strong> — For public clients (mobile, SPAs)</li>
+        </ul>`
+      },
+      {
+        q:"What is the difference between Authentication and Authorization?",
+        level:"medium",
+        a:`<p>These two concepts are often confused but serve different purposes:</p>
+        <table class="q-table"><thead><tr><th>Aspect</th><th>Authentication (AuthN)</th><th>Authorization (AuthZ)</th></tr></thead><tbody>
+        <tr><td>Question</td><td>"Who are you?"</td><td>"What can you do?"</td></tr>
+        <tr><td>Purpose</td><td>Verify identity</td><td>Control access/permissions</td></tr>
+        <tr><td>When</td><td>First step</td><td>After authentication</td></tr>
+        <tr><td>Example</td><td>Login with email/password</td><td>Admin can delete users, others can't</td></tr>
+        <tr><td>HTTP Code (fail)</td><td>401 Unauthorized</td><td>403 Forbidden</td></tr>
+        <tr><td>Tools</td><td>JWT, OAuth, Sessions</td><td>RBAC, ABAC, ACL</td></tr>
+        </tbody></table>
+        <div class="note-box">Real-world: A hotel key card authenticates you (you're a valid guest) but only authorizes access to your room — not all rooms.</div>`
+      },
+      {
+        q:"What API security vulnerabilities should you test for?",
+        level:"hard",
+        a:`<p>According to the <strong>OWASP API Security Top 10</strong>, the most critical API vulnerabilities are:</p>
+        <ul>
+          <li><strong>Broken Object Level Authorization (BOLA/IDOR)</strong> — Can user A access user B's data by changing the ID? <code>GET /users/123</code> → try <code>GET /users/124</code></li>
+          <li><strong>Broken Authentication</strong> — Weak passwords, no token expiry, credentials in URLs</li>
+          <li><strong>Broken Object Property Level Authorization</strong> — Mass assignment (sending extra fields that get saved)</li>
+          <li><strong>Unrestricted Resource Consumption</strong> — No rate limiting, large payloads accepted</li>
+          <li><strong>Broken Function Level Authorization</strong> — Regular user calling admin endpoints</li>
+          <li><strong>Server-Side Request Forgery (SSRF)</strong> — API fetches attacker-controlled URLs</li>
+          <li><strong>SQL/NoSQL Injection</strong> — Malicious code in input fields</li>
+          <li><strong>Security Misconfiguration</strong> — CORS wildcard, verbose errors, default credentials</li>
+          <li><strong>Improper Inventory Management</strong> — Old API versions still accessible</li>
+          <li><strong>Unsafe Consumption of APIs</strong> — Trusting third-party API data blindly</li>
+        </ul>
+        <div class="tip-box">Test BOLA/IDOR on every GET/PUT/DELETE endpoint. It's the #1 API vulnerability in the wild!</div>`
+      },
+    ]
+  },
+  {
+    title:"Tools & Automation",
+    icon:"04",
+    questions:[
+      {
+        q:"What are the popular API testing tools and when to use them?",
+        level:"medium",
+        a:`<table class="q-table"><thead><tr><th>Tool</th><th>Best For</th><th>Language</th></tr></thead><tbody>
+        <tr><td><strong>Postman</strong></td><td>Manual testing, quick exploration, collections</td><td>JavaScript (tests)</td></tr>
+        <tr><td><strong>REST Assured</strong></td><td>Java automation, BDD-style</td><td>Java</td></tr>
+        <tr><td><strong>Karate DSL</strong></td><td>BDD API testing, no coding needed</td><td>Gherkin/Java</td></tr>
+        <tr><td><strong>Pytest + Requests</strong></td><td>Python automation, flexible</td><td>Python</td></tr>
+        <tr><td><strong>Newman</strong></td><td>Run Postman collections in CI/CD</td><td>CLI/Node.js</td></tr>
+        <tr><td><strong>SoapUI</strong></td><td>SOAP services, complex scenarios</td><td>Groovy/Java</td></tr>
+        <tr><td><strong>k6</strong></td><td>Performance & load testing</td><td>JavaScript</td></tr>
+        <tr><td><strong>Insomnia</strong></td><td>GraphQL and REST, lightweight</td><td>JavaScript</td></tr>
+        <tr><td><strong>Cypress</strong></td><td>API + UI combined testing</td><td>JavaScript</td></tr>
+        <tr><td><strong>Pact</strong></td><td>Contract testing</td><td>Multiple</td></tr>
+        </tbody></table>`
+      },
+      {
+        q:"How do you write API tests using Python requests library?",
+        level:"medium",
+        a:`<p>Python's <code>requests</code> library combined with <code>pytest</code> is a powerful combination for API automation:</p>
+        <div class="code-snippet"><span class="c-blue">import</span> requests
+<span class="c-blue">import</span> pytest
+
+BASE_URL = <span class="c-yellow">"https://api.example.com"</span>
+HEADERS = {<span class="c-yellow">"Authorization"</span>: <span class="c-yellow">"Bearer your-token"</span>}
+
+<span class="c-gray"># Test GET - Fetch user</span>
+<span class="c-blue">def</span> <span class="c-green">test_get_user</span>():
+    response = requests.get(<span class="c-yellow">f"{BASE_URL}/users/1"</span>, headers=HEADERS)
+    <span class="c-blue">assert</span> response.status_code == <span class="c-purple">200</span>
+    data = response.json()
+    <span class="c-blue">assert</span> data[<span class="c-yellow">"id"</span>] == <span class="c-purple">1</span>
+    <span class="c-blue">assert</span> <span class="c-yellow">"name"</span> <span class="c-blue">in</span> data
+    <span class="c-blue">assert</span> response.elapsed.total_seconds() < <span class="c-purple">1.0</span>
+
+<span class="c-gray"># Test POST - Create user</span>
+<span class="c-blue">def</span> <span class="c-green">test_create_user</span>():
+    payload = {<span class="c-yellow">"name"</span>: <span class="c-yellow">"Alice"</span>, <span class="c-yellow">"email"</span>: <span class="c-yellow">"alice@test.com"</span>}
+    response = requests.post(<span class="c-yellow">f"{BASE_URL}/users"</span>, json=payload, headers=HEADERS)
+    <span class="c-blue">assert</span> response.status_code == <span class="c-purple">201</span>
+    <span class="c-blue">assert</span> response.json()[<span class="c-yellow">"name"</span>] == <span class="c-yellow">"Alice"</span></div>`
+      },
+      {
+        q:"How do you handle API test data and environments?",
+        level:"medium",
+        a:`<p>Managing test data and environments is critical for reliable API testing:</p>
+        <p><strong>Environment Management (Postman):</strong></p>
+        <div class="code-snippet"><span class="c-gray">// Development environment variables</span>
+BASE_URL = <span class="c-yellow">"http://localhost:3000"</span>
+API_KEY  = <span class="c-yellow">"dev-key-123"</span>
+USER_ID  = <span class="c-purple">1</span>
+
+<span class="c-gray">// Staging environment variables</span>
+BASE_URL = <span class="c-yellow">"https://staging.api.example.com"</span>
+API_KEY  = <span class="c-yellow">"staging-key-456"</span>
+
+<span class="c-gray">// Use in requests: {{BASE_URL}}/users/{{USER_ID}}</span></div>
+        <p><strong>Test Data Strategies:</strong></p>
+        <ul>
+          <li><strong>Static data</strong> — Fixed test data in fixtures/JSON files</li>
+          <li><strong>Dynamic data</strong> — Generate random data using Faker library</li>
+          <li><strong>Database seeding</strong> — Pre-populate DB before tests</li>
+          <li><strong>Data cleanup</strong> — Delete test data after each test (teardown)</li>
+          <li><strong>Chained requests</strong> — Use response from one test as input for next</li>
+        </ul>
+        <div class="code-snippet"><span class="c-gray"># Python - Chaining requests</span>
+<span class="c-blue">def</span> <span class="c-green">test_create_and_verify</span>():
+    <span class="c-gray"># Step 1: Create user</span>
+    create_resp = requests.post(<span class="c-yellow">"/users"</span>, json={<span class="c-yellow">"name"</span>: <span class="c-yellow">"Alice"</span>})
+    user_id = create_resp.json()[<span class="c-yellow">"id"</span>]
+
+    <span class="c-gray"># Step 2: Verify it exists</span>
+    get_resp = requests.get(<span class="c-yellow">f"/users/{user_id}"</span>)
+    <span class="c-blue">assert</span> get_resp.json()[<span class="c-yellow">"name"</span>] == <span class="c-yellow">"Alice"</span></div>`
+      },
+      {
+        q:"What is Newman and how do you use it in CI/CD?",
+        level:"hard",
+        a:`<p><strong>Newman</strong> is Postman's official command-line runner. It lets you run Postman collections in CI/CD pipelines without opening Postman's GUI.</p>
+        <div class="code-snippet"><span class="c-gray"># Install Newman</span>
+npm install -g newman
+
+<span class="c-gray"># Run a collection</span>
+newman run MyCollection.json
+
+<span class="c-gray"># Run with environment</span>
+newman run MyCollection.json \
+  -e staging-env.json \
+  --reporters cli,junit \
+  --reporter-junit-export results.xml
+
+<span class="c-gray"># GitHub Actions example</span>
+- name: Run API Tests
+  run: |
+    newman run tests/api-collection.json \
+      -e tests/staging.env.json \
+      --bail</div>
+        <div class="tip-box">Use <code>--bail</code> flag to stop Newman on first failure. Use JUnit reporter for test result integration with Jenkins/GitHub Actions.</div>`
+      },
+      {
+        q:"How do you do API testing with REST Assured (Java)?",
+        level:"hard",
+        a:`<p><strong>REST Assured</strong> is a Java library that provides a BDD-style DSL for testing REST APIs:</p>
+        <div class="code-snippet"><span class="c-blue">import</span> io.restassured.RestAssured;
+<span class="c-blue">import static</span> io.restassured.RestAssured.*;
+<span class="c-blue">import static</span> org.hamcrest.Matchers.*;
+
+<span class="c-blue">public class</span> <span class="c-green">UserApiTest</span> {
+
+  <span class="c-purple">@BeforeClass</span>
+  <span class="c-blue">public static void</span> <span class="c-green">setup</span>() {
+    RestAssured.baseURI = <span class="c-yellow">"https://api.example.com"</span>;
+  }
+
+  <span class="c-purple">@Test</span>
+  <span class="c-blue">public void</span> <span class="c-green">testGetUser</span>() {
+    given()
+      .header(<span class="c-yellow">"Authorization"</span>, <span class="c-yellow">"Bearer token123"</span>)
+    .when()
+      .get(<span class="c-yellow">"/users/1"</span>)
+    .then()
+      .statusCode(<span class="c-purple">200</span>)
+      .body(<span class="c-yellow">"name"</span>, equalTo(<span class="c-yellow">"Alice"</span>))
+      .body(<span class="c-yellow">"email"</span>, containsString(<span class="c-yellow">"@"</span>))
+      .time(lessThan(<span class="c-purple">1000L</span>)); <span class="c-gray">// ms</span>
+  }
+}</div>`
+      },
+    ]
+  },
+  {
+    title:"Advanced Concepts",
+    icon:"05",
+    questions:[
+      {
+        q:"What is GraphQL? How is it different from REST?",
+        level:"hard",
+        a:`<p><strong>GraphQL</strong> is a query language for APIs that lets clients request exactly the data they need — no more, no less.</p>
+        <div class="code-snippet"><span class="c-gray"># REST - Multiple requests needed</span>
+GET /users/1          → gets full user object
+GET /users/1/posts    → gets all posts (even if you only want titles)
+GET /users/1/friends  → separate call for friends
+
+<span class="c-gray"># GraphQL - ONE request, exact data</span>
+query {
+  user(id: 1) {
+    name
+    posts { title }
+    friends { name }
+  }
+}</div>
+        <table class="q-table"><thead><tr><th>Feature</th><th>REST</th><th>GraphQL</th></tr></thead><tbody>
+        <tr><td>Endpoints</td><td>Many (one per resource)</td><td>Single endpoint (/graphql)</td></tr>
+        <tr><td>Over-fetching</td><td>Common problem</td><td>Never — get what you ask</td></tr>
+        <tr><td>Under-fetching</td><td>Common (multiple calls)</td><td>Never — one query</td></tr>
+        <tr><td>Versioning</td><td>v1, v2, v3 URLs</td><td>No versioning needed</td></tr>
+        <tr><td>Learning curve</td><td>Low</td><td>Higher</td></tr>
+        <tr><td>Caching</td><td>Easy (HTTP caching)</td><td>Complex</td></tr>
+        </tbody></table>`
+      },
+      {
+        q:"What is API Rate Limiting? How do you test it?",
+        level:"hard",
+        a:`<p><strong>Rate limiting</strong> restricts how many API requests a client can make in a time window to prevent abuse and ensure fair usage.</p>
+        <p><strong>Common rate limit headers:</strong></p>
+        <div class="code-snippet"><span class="c-gray"># Response headers when rate limiting is active</span>
+X-RateLimit-Limit: <span class="c-purple">100</span>          <span class="c-gray"># Max requests per window</span>
+X-RateLimit-Remaining: <span class="c-purple">47</span>       <span class="c-gray"># Requests left</span>
+X-RateLimit-Reset: <span class="c-purple">1700000000</span>   <span class="c-gray"># When limit resets (Unix timestamp)</span>
+Retry-After: <span class="c-purple">30</span>                 <span class="c-gray"># Seconds to wait (on 429)</span></div>
+        <p><strong>How to test rate limiting:</strong></p>
+        <ul>
+          <li>Send requests until you hit 429 — verify it returns 429 (not 500)</li>
+          <li>Verify Retry-After header is present on 429</li>
+          <li>After waiting, verify access is restored</li>
+          <li>Test different endpoints have their own limits</li>
+          <li>Test authenticated users get higher limits than anonymous</li>
+        </ul>
+        <div class="code-snippet"><span class="c-gray"># Postman - Test rate limit</span>
+<span class="c-blue">const</span> remaining = pm.response.headers.get(<span class="c-yellow">"X-RateLimit-Remaining"</span>);
+pm.test(<span class="c-yellow">"Rate limit header present"</span>, () => {
+  pm.expect(remaining).to.not.be.null;
+  pm.expect(parseInt(remaining)).to.be.at.least(<span class="c-purple">0</span>);
+});</div>`
+      },
+      {
+        q:"What is API Versioning? What are the strategies?",
+        level:"hard",
+        a:`<p><strong>API versioning</strong> allows you to make breaking changes while keeping old clients working. It's essential for APIs with external consumers.</p>
+        <p><strong>4 Versioning Strategies:</strong></p>
+        <ul>
+          <li><strong>URL Path Versioning</strong> — Most common, very visible
+            <code>GET /api/v1/users</code> vs <code>GET /api/v2/users</code></li>
+          <li><strong>Query Parameter Versioning</strong> — Easy to test
+            <code>GET /api/users?version=2</code></li>
+          <li><strong>Header Versioning</strong> — Clean URLs, harder to test
+            <code>Accept: application/vnd.api+json;version=2</code></li>
+          <li><strong>Content Negotiation</strong> — Uses Accept header
+            <code>Accept: application/vnd.company.v2+json</code></li>
+        </ul>
+        <p><strong>Testing versioned APIs:</strong></p>
+        <ul>
+          <li>Test that v1 still works after v2 is released</li>
+          <li>Test deprecated endpoints return warning headers</li>
+          <li>Test old clients aren't broken by new versions</li>
+          <li>Verify version in response body/header</li>
+        </ul>
+        <div class="tip-box">URL versioning is the most popular because it's visible, easy to document, and simple to test in browsers.</div>`
+      },
+      {
+        q:"What is Contract Testing? What is Pact?",
+        level:"expert",
+        a:`<p><strong>Contract Testing</strong> verifies that two services (consumer and provider) agree on the API contract — the format, fields, and behaviors they expect from each other.</p>
+        <p><strong>Why Contract Testing?</strong></p>
+        <ul>
+          <li>Microservices: when Service A calls Service B, both must agree on the "contract"</li>
+          <li>Catches breaking changes before they reach production</li>
+          <li>Faster than integration tests (no need to run all services)</li>
+          <li>Each team can test independently</li>
+        </ul>
+        <p><strong>Pact</strong> is the most popular contract testing framework. It uses Consumer-Driven Contract (CDC) testing:</p>
+        <div class="code-snippet"><span class="c-gray">// 1. Consumer defines the contract (what it expects)</span>
+pact
+  .interaction(<span class="c-yellow">"Get user"</span>)
+  .given(<span class="c-yellow">"User 1 exists"</span>)
+  .uponReceiving(<span class="c-yellow">"GET /users/1"</span>)
+  .willRespondWith({
+    status: <span class="c-purple">200</span>,
+    body: { id: <span class="c-purple">1</span>, name: <span class="c-green">like</span>(<span class="c-yellow">"Alice"</span>) }
+  });
+
+<span class="c-gray">// 2. Pact publishes contract to Pact Broker</span>
+<span class="c-gray">// 3. Provider verifies it can fulfill the contract</span></div>`
+      },
+      {
+        q:"What is API Mocking? When and why do you use it?",
+        level:"hard",
+        a:`<p><strong>API Mocking</strong> creates a fake/simulated API that returns predefined responses, allowing you to test without the real server.</p>
+        <p><strong>When to use mocking:</strong></p>
+        <ul>
+          <li>API isn't built yet but you want to test the consumer</li>
+          <li>Third-party API has rate limits or costs money</li>
+          <li>Testing error scenarios (hard to reproduce in real systems)</li>
+          <li>Isolated unit testing of components</li>
+          <li>Parallel development (frontend + backend simultaneously)</li>
+        </ul>
+        <p><strong>Popular mocking tools:</strong></p>
+        <ul>
+          <li><strong>Postman Mock Server</strong> — Built into Postman, easy setup</li>
+          <li><strong>WireMock</strong> — Powerful Java mock server</li>
+          <li><strong>MockServer</strong> — Docker-friendly</li>
+          <li><strong>json-server</strong> — Instant fake REST API from JSON file</li>
+          <li><strong>MSW (Mock Service Worker)</strong> — Frontend testing</li>
+        </ul>
+        <div class="code-snippet"><span class="c-gray"># json-server example</span>
+<span class="c-gray"># 1. Create db.json</span>
+{ <span class="c-yellow">"users"</span>: [{ <span class="c-yellow">"id"</span>: <span class="c-purple">1</span>, <span class="c-yellow">"name"</span>: <span class="c-yellow">"Alice"</span> }] }
+
+<span class="c-gray"># 2. Run instant mock API</span>
+npx json-server db.json --port 3001
+
+<span class="c-gray"># 3. Now GET /users returns Alice!</span></div>`
+      },
+      {
+        q:"What is the difference between Idempotent and Safe methods?",
+        level:"medium",
+        a:`<p>These are important concepts for understanding HTTP method behavior:</p>
+        <p><strong>Safe Methods</strong> — Do NOT modify server data. Read-only operations.</p>
+        <p><strong>Idempotent Methods</strong> — Calling multiple times gives the same result as calling once.</p>
+        <table class="q-table"><thead><tr><th>Method</th><th>Safe</th><th>Idempotent</th><th>Reason</th></tr></thead><tbody>
+        <tr><td>GET</td><td>✅</td><td>✅</td><td>Just reads data, no side effects</td></tr>
+        <tr><td>HEAD</td><td>✅</td><td>✅</td><td>Same as GET but no body</td></tr>
+        <tr><td>OPTIONS</td><td>✅</td><td>✅</td><td>Just describes options</td></tr>
+        <tr><td>POST</td><td>❌</td><td>❌</td><td>Creates new resource each time</td></tr>
+        <tr><td>PUT</td><td>❌</td><td>✅</td><td>Replace always gives same result</td></tr>
+        <tr><td>PATCH</td><td>❌</td><td>❌</td><td>Relative changes can accumulate</td></tr>
+        <tr><td>DELETE</td><td>❌</td><td>✅</td><td>Deleting twice = same end state</td></tr>
+        </tbody></table>
+        <div class="note-box">DELETE is idempotent: first call deletes the resource (204), second call returns 404. The end state (resource gone) is the same.</div>`
+      },
+    ]
+  },
+  {
+    title:"Performance & Load Testing",
+    icon:"06",
+    questions:[
+      {
+        q:"What is API Performance Testing? What are the key metrics?",
+        level:"hard",
+        a:`<p><strong>Performance testing</strong> evaluates how an API behaves under various conditions of load and stress.</p>
+        <p><strong>Key Performance Metrics:</strong></p>
+        <ul>
+          <li><strong>Response Time</strong> — Time from request sent to response received (aim: &lt;200ms for simple APIs)</li>
+          <li><strong>Throughput</strong> — Requests per second (RPS) the API can handle</li>
+          <li><strong>Error Rate</strong> — % of requests that fail (target: &lt;0.1%)</li>
+          <li><strong>Percentiles (P50, P90, P99)</strong> — 99% of requests complete in X ms</li>
+          <li><strong>Concurrent Users</strong> — How many simultaneous users it supports</li>
+          <li><strong>Resource Usage</strong> — CPU, memory, network under load</li>
+          <li><strong>Latency</strong> — Network delay between client and server</li>
+        </ul>
+        <div class="code-snippet"><span class="c-gray">// k6 Performance Test</span>
+<span class="c-blue">import</span> http <span class="c-blue">from</span> <span class="c-yellow">'k6/http'</span>;
+<span class="c-blue">import</span> { check, sleep } <span class="c-blue">from</span> <span class="c-yellow">'k6'</span>;
+
+<span class="c-blue">export const</span> options = {
+  vus: <span class="c-purple">100</span>,          <span class="c-gray">// 100 virtual users</span>
+  duration: <span class="c-yellow">'30s'</span>,   <span class="c-gray">// for 30 seconds</span>
+};
+
+<span class="c-blue">export default function</span> () {
+  <span class="c-blue">const</span> res = http.get(<span class="c-yellow">'https://api.example.com/users'</span>);
+  check(res, { <span class="c-yellow">'status is 200'</span>: (r) => r.status === <span class="c-purple">200</span> });
+  sleep(<span class="c-purple">1</span>);
+}</div>`
+      },
+      {
+        q:"What is the difference between Load, Stress, and Spike testing?",
+        level:"hard",
+        a:`<table class="q-table"><thead><tr><th>Test Type</th><th>What it Tests</th><th>Pattern</th></tr></thead><tbody>
+        <tr><td><strong>Load Test</strong></td><td>Normal + expected peak load</td><td>Gradual ramp up to target, hold, ramp down</td></tr>
+        <tr><td><strong>Stress Test</strong></td><td>Beyond capacity — find breaking point</td><td>Keep increasing until failure</td></tr>
+        <tr><td><strong>Spike Test</strong></td><td>Sudden burst of traffic</td><td>Instant jump to 10x load, then back down</td></tr>
+        <tr><td><strong>Soak/Endurance</strong></td><td>Long-duration stability (memory leaks)</td><td>Normal load for hours/days</td></tr>
+        <tr><td><strong>Volume Test</strong></td><td>Large amounts of data</td><td>Normal users but huge database</td></tr>
+        <tr><td><strong>Scalability Test</strong></td><td>How it scales with resources</td><td>Add servers and measure improvement</td></tr>
+        </tbody></table>
+        <div class="tip-box">For most teams: start with Load Testing (your expected traffic), then Stress Testing (find the limit). Spike and Soak tests come later.</div>`
+      },
+    ]
+  },
+  {
+    title:"Senior & Expert Level",
+    icon:"07",
+    questions:[
+      {
+        q:"How do you design an API test automation framework from scratch?",
+        level:"expert",
+        a:`<p>A well-designed API test framework has these components:</p>
+        <div class="code-snippet"><span class="c-gray">📁 api-test-framework/</span>
+├── <span class="c-green">config/</span>
+│   ├── dev.json          <span class="c-gray"># Dev environment variables</span>
+│   ├── staging.json      <span class="c-gray"># Staging variables</span>
+│   └── prod.json         <span class="c-gray"># Production (read-only tests)</span>
+├── <span class="c-yellow">utils/</span>
+│   ├── api_client.py     <span class="c-gray"># Base HTTP client wrapper</span>
+│   ├── auth_helper.py    <span class="c-gray"># Token generation/refresh</span>
+│   └── data_factory.py   <span class="c-gray"># Test data generation</span>
+├── <span class="c-blue">tests/</span>
+│   ├── test_users.py     <span class="c-gray"># User API tests</span>
+│   ├── test_orders.py    <span class="c-gray"># Orders API tests</span>
+│   └── test_auth.py      <span class="c-gray"># Auth tests</span>
+├── <span class="c-orange">schemas/</span>
+│   ├── user_schema.json  <span class="c-gray"># JSON schema for validation</span>
+│   └── order_schema.json
+├── <span class="c-purple">reports/</span>             <span class="c-gray"># HTML test reports</span>
+├── conftest.py           <span class="c-gray"># Pytest fixtures</span>
+└── pytest.ini            <span class="c-gray"># Pytest config</span></div>
+        <p><strong>Key Framework Principles:</strong></p>
+        <ul>
+          <li><strong>Reusability</strong> — Base client class for all HTTP calls</li>
+          <li><strong>Maintainability</strong> — Page Object Model equivalent for APIs</li>
+          <li><strong>Data-driven</strong> — Parametrized tests with external data</li>
+          <li><strong>Environment-agnostic</strong> — Run same tests on any env</li>
+          <li><strong>Parallel execution</strong> — pytest-xdist for speed</li>
+          <li><strong>CI/CD ready</strong> — Docker + GitHub Actions integration</li>
+        </ul>`
+      },
+      {
+        q:"What is JSON Schema validation? How do you implement it?",
+        level:"expert",
+        a:`<p><strong>JSON Schema</strong> is a vocabulary to validate the structure and content of JSON data. It ensures API responses always match the expected format.</p>
+        <div class="code-snippet"><span class="c-gray">// user_schema.json</span>
+{
+  <span class="c-green">"type"</span>: <span class="c-yellow">"object"</span>,
+  <span class="c-green">"required"</span>: [<span class="c-yellow">"id"</span>, <span class="c-yellow">"name"</span>, <span class="c-yellow">"email"</span>],
+  <span class="c-green">"properties"</span>: {
+    <span class="c-green">"id"</span>:    { <span class="c-green">"type"</span>: <span class="c-yellow">"integer"</span>, <span class="c-green">"minimum"</span>: <span class="c-purple">1</span> },
+    <span class="c-green">"name"</span>:  { <span class="c-green">"type"</span>: <span class="c-yellow">"string"</span>,  <span class="c-green">"minLength"</span>: <span class="c-purple">1</span> },
+    <span class="c-green">"email"</span>: { <span class="c-green">"type"</span>: <span class="c-yellow">"string"</span>,  <span class="c-green">"format"</span>: <span class="c-yellow">"email"</span> },
+    <span class="c-green">"age"</span>:   { <span class="c-green">"type"</span>: <span class="c-yellow">"integer"</span>, <span class="c-green">"minimum"</span>: <span class="c-purple">0</span>, <span class="c-green">"maximum"</span>: <span class="c-purple">150</span> }
+  },
+  <span class="c-green">"additionalProperties"</span>: <span class="c-blue">false</span>
+}</div>
+        <div class="code-snippet"><span class="c-gray"># Python - Schema validation with jsonschema</span>
+<span class="c-blue">import</span> jsonschema, json, requests
+
+schema = json.load(open(<span class="c-yellow">"schemas/user_schema.json"</span>))
+
+<span class="c-blue">def</span> <span class="c-green">test_user_schema</span>():
+    response = requests.get(<span class="c-yellow">"/users/1"</span>)
+    jsonschema.validate(response.json(), schema)  <span class="c-gray"># Raises if invalid</span></div>
+        <div class="tip-box">Schema validation catches API contract violations automatically. If a developer removes a required field, your test fails immediately!</div>`
+      },
+      {
+        q:"How do you test microservices APIs? What are the challenges?",
+        level:"expert",
+        a:`<p>Testing microservices APIs is complex because services are distributed and interdependent.</p>
+        <p><strong>Testing Strategy (Test Pyramid for Microservices):</strong></p>
+        <ul>
+          <li><strong>Unit Tests</strong> — Test each service's business logic in isolation (mocked dependencies)</li>
+          <li><strong>Contract Tests (Pact)</strong> — Verify service-to-service API contracts</li>
+          <li><strong>Component Tests</strong> — Test each microservice end-to-end with real DB, mocked external services</li>
+          <li><strong>Integration Tests</strong> — Test 2-3 services together</li>
+          <li><strong>End-to-End Tests</strong> — Full user journey (keep minimal)</li>
+        </ul>
+        <p><strong>Key Challenges:</strong></p>
+        <ul>
+          <li><strong>Service dependencies</strong> — Service A needs B which needs C running</li>
+          <li><strong>Data consistency</strong> — Data spread across multiple databases</li>
+          <li><strong>Network failures</strong> — Test timeouts, retries, circuit breakers</li>
+          <li><strong>Async communication</strong> — Events/messages via Kafka/RabbitMQ</li>
+          <li><strong>Environment setup</strong> — Docker Compose needed to run all services</li>
+          <li><strong>Debugging</strong> — Distributed tracing (Jaeger, Zipkin) needed</li>
+        </ul>
+        <div class="note-box">Use Consumer-Driven Contract testing (Pact) to reduce integration test complexity. Each team tests their contract independently.</div>`
+      },
+      {
+        q:"What is API Gateway? How does it affect testing?",
+        level:"expert",
+        a:`<p>An <strong>API Gateway</strong> is a server that acts as the single entry point for all client requests. It sits between clients and backend microservices.</p>
+        <p><strong>API Gateway responsibilities:</strong></p>
+        <ul>
+          <li><strong>Routing</strong> — Forward requests to correct microservice</li>
+          <li><strong>Authentication</strong> — Verify tokens before forwarding</li>
+          <li><strong>Rate Limiting</strong> — Throttle requests per client</li>
+          <li><strong>Load Balancing</strong> — Distribute traffic across instances</li>
+          <li><strong>SSL Termination</strong> — Handle HTTPS</li>
+          <li><strong>Request/Response Transform</strong> — Modify headers, body</li>
+          <li><strong>Caching</strong> — Cache responses</li>
+          <li><strong>Monitoring</strong> — Log all requests</li>
+        </ul>
+        <p><strong>Testing considerations with API Gateway:</strong></p>
+        <ul>
+          <li>Test authentication at the gateway level (not just service level)</li>
+          <li>Test rate limiting policies</li>
+          <li>Test routing rules — does /v1/users go to the right service?</li>
+          <li>Test that gateway transforms are applied correctly</li>
+          <li>Test bypass attacks (can you access services directly, bypassing gateway?)</li>
+        </ul>
+        <p><strong>Popular API Gateways:</strong> AWS API Gateway, Kong, NGINX, Apigee, Azure APIM, Traefik</p>`
+      },
+      {
+        q:"What is Chaos Engineering and how does it apply to API testing?",
+        level:"expert",
+        a:`<p><strong>Chaos Engineering</strong> is intentionally injecting failures into your system to test resilience. The idea: break things on purpose in controlled ways before real failures surprise you.</p>
+        <p><strong>Chaos experiments for APIs:</strong></p>
+        <ul>
+          <li><strong>Latency injection</strong> — Add 2-second delays to see if timeouts work</li>
+          <li><strong>Error injection</strong> — Return 500 errors from dependencies 50% of the time</li>
+          <li><strong>Kill a service</strong> — Shut down a microservice and verify circuit breaker activates</li>
+          <li><strong>Network partition</strong> — Block network between services</li>
+          <li><strong>Resource exhaustion</strong> — Use all CPU/memory on a server</li>
+          <li><strong>Data corruption</strong> — Return malformed JSON from a service</li>
+        </ul>
+        <p><strong>Test what should happen:</strong></p>
+        <ul>
+          <li>Circuit breaker opens after N failures</li>
+          <li>Retry logic kicks in (with exponential backoff)</li>
+          <li>Fallback responses are served</li>
+          <li>Health check endpoints report degraded status</li>
+          <li>Alerts fire within acceptable time</li>
+        </ul>
+        <p><strong>Tools:</strong> Netflix Chaos Monkey, Chaos Toolkit, AWS Fault Injection Simulator, Gremlin</p>
+        <div class="tip-box">Start Chaos Engineering in staging first. Always have a "stop" button and monitor everything during experiments!</div>`
+      },
+      {
+        q:"How do you handle API test flakiness? What causes it and how to fix?",
+        level:"expert",
+        a:`<p><strong>Flaky tests</strong> pass and fail intermittently without code changes. They're the #1 enemy of test automation trust.</p>
+        <p><strong>Common causes of API test flakiness:</strong></p>
+        <ul>
+          <li><strong>Race conditions</strong> — Tests running in parallel interfere with each other</li>
+          <li><strong>Timing issues</strong> — Async operations not complete before assertion</li>
+          <li><strong>Test data conflicts</strong> — Tests sharing same data, stepping on each other</li>
+          <li><strong>External dependencies</strong> — Third-party services being slow/down</li>
+          <li><strong>Environment issues</strong> — Different behavior on CI vs local</li>
+          <li><strong>No cleanup</strong> — Previous test's data affects next test</li>
+          <li><strong>Hardcoded timing</strong> — <code>sleep(2)</code> not long enough on slow CI</li>
+        </ul>
+        <p><strong>How to fix flaky tests:</strong></p>
+        <ul>
+          <li>Use proper wait strategies (poll until condition, not fixed sleep)</li>
+          <li>Isolate test data — each test creates and cleans up its own data</li>
+          <li>Mock external dependencies</li>
+          <li>Use unique identifiers per test run (UUID in test data)</li>
+          <li>Run tests in isolation (not parallel for shared resources)</li>
+          <li>Retry logic for known transient failures (with alerting)</li>
+          <li>Fix root cause — don't just add retries and ignore flakiness</li>
+        </ul>
+        <div class="code-snippet"><span class="c-gray"># Good: Poll until ready (no fixed sleep)</span>
+<span class="c-blue">def</span> <span class="c-green">wait_for_status</span>(url, expected=<span class="c-purple">200</span>, timeout=<span class="c-purple">10</span>):
+    <span class="c-blue">for</span> _ <span class="c-blue">in</span> range(timeout):
+        <span class="c-blue">if</span> requests.get(url).status_code == expected:
+            <span class="c-blue">return True</span>
+        time.sleep(<span class="c-purple">1</span>)
+    <span class="c-blue">raise</span> TimeoutError(<span class="c-yellow">"API not ready"</span>)</div>`
+      },
+    ]
+  }
+];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let currentLevel = 'all';
+let openedSet = new Set();
+let totalQ = 0;
+
+// ══════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════
+function render() {
+  const root = document.getElementById('questionsRoot');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  root.innerHTML = '';
+  totalQ = 0;
+  let visibleCount = 0;
+
+  sections.forEach(sec => {
+    const filtered = sec.questions.filter(q => {
+      const matchLevel = currentLevel === 'all' || q.level === currentLevel;
+      const matchSearch = !search || q.q.toLowerCase().includes(search);
+      return matchLevel && matchSearch;
+    });
+
+    if (filtered.length === 0) return;
+    visibleCount += filtered.length;
+
+    const secDiv = document.createElement('div');
+    secDiv.innerHTML = `
+      <div class="section-header">
+        <div class="section-num">${sec.icon}</div>
+        <h2>${sec.title}</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="questions-grid" id="grid-${sec.icon}"></div>
+    `;
+    root.appendChild(secDiv);
+
+    const grid = secDiv.querySelector(`#grid-${sec.icon}`);
+    filtered.forEach((q, i) => {
+      totalQ++;
+      const globalIdx = `${sec.icon}-${i}`;
+      const isOpen = openedSet.has(globalIdx);
+      const card = document.createElement('div');
+      card.className = `q-card${isOpen ? ' open' : ''}`;
+      card.innerHTML = `
+        <div class="q-header" onclick="toggleCard('${globalIdx}', this)">
+          <span class="q-num">Q${totalQ.toString().padStart(2,'0')}</span>
+          <span class="q-title">${q.q}</span>
+          <div class="q-meta">
+            <span class="badge ${q.level}">${q.level}</span>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="q-answer">
+          <div class="answer-inner">${q.a}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  });
+
+  if (visibleCount === 0) {
+    root.innerHTML = `<div class="empty"><p>No questions found. Try a different search!</p></div>`;
+  }
+
+  document.getElementById('totalCount').textContent = totalQ;
+  updateProgress();
+}
+
+function toggleCard(id, header) {
+  const card = header.closest('.q-card');
+  const wasOpen = card.classList.contains('open');
+  card.classList.toggle('open');
+  if (!wasOpen) {
+    openedSet.add(id);
+  }
+  updateProgress();
+}
+
+function setLevel(btn, level) {
+  currentLevel = level;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function filterAll() { render(); }
+
+function updateProgress() {
+  const pct = totalQ > 0 ? Math.round(openedSet.size / totalQ * 100) : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progLabel').textContent = `${pct}% explored`;
+  document.getElementById('openedCount').textContent = openedSet.size;
+}
+
+// Back to top
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backTop');
+  btn.classList.toggle('show', window.scrollY > 400);
+});
+
+// Init
+render();
+</script>
+</body>
+</html>
